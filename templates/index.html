@@ -241,7 +241,7 @@
     
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('admin', this)">Admin</button>
-        <button class="tab-btn" onclick="switchTab('employee', this)">Werknemers</button>
+        <button class="tab-btn" onclick="switchTab('clubmanager', this)">Clubmanagers</button>
         <button class="tab-btn" onclick="switchTab('history', this)">Historiek</button>
     </div>
     
@@ -289,16 +289,16 @@
         </div>
     </div>
     
-    <!-- EMPLOYEE -->
-    <div id="employee" class="section">
+    <!-- CLUBMANAGERS -->
+    <div id="clubmanager" class="section">
         <div class="card">
             <h3>Materiaal uitchecken</h3>
-            <div id="employee-message" class="success-message"></div>
+            <div id="clubmanager-message" class="success-message"></div>
             <div class="input-group">
                 <label>Jouw naam</label>
-                <input type="text" id="employeeName" placeholder="bijv. Jan de Vries">
+                <input type="text" id="clubmanagerName" placeholder="bijv. Jan de Vries">
             </div>
-            <div id="employee-items" class="loading">Laden...</div>
+            <div id="clubmanager-items" class="loading">Laden...</div>
             <button onclick="submitCheckout()">✓ Opslaan</button>
         </div>
     </div>
@@ -332,7 +332,7 @@ function switchTab(tab, btn) {
     
     if (tab === 'history') loadHistory();
     else if (tab === 'admin') loadItems('admin');
-    else loadItems('employee');
+    else loadItems('clubmanager');
 }
 
 async function addItem() {
@@ -386,7 +386,7 @@ async function addDelivery() {
 }
 
 async function submitCheckout() {
-    const name = document.getElementById('employeeName').value.trim();
+    const name = document.getElementById('clubmanagerName').value.trim();
     if (!name) {
         alert('Voer je naam in');
         return;
@@ -415,18 +415,18 @@ async function submitCheckout() {
             body: JSON.stringify({employee_name: name, items})
         });
         
-        document.getElementById('employeeName').value = '';
+        document.getElementById('clubmanagerName').value = '';
         allItems.forEach(item => {
             const input = document.getElementById(`qty-${item.id}`);
             if (input) input.value = '0';
         });
         
-        const msg = document.getElementById('employee-message');
+        const msg = document.getElementById('clubmanager-message');
         msg.textContent = '✓ Opgeslagen!';
         msg.style.display = 'block';
         setTimeout(() => msg.style.display = 'none', 2000);
         
-        loadItems('employee');
+        loadItems('clubmanager');
     } catch (error) {
         console.error('Error submitting checkout:', error);
     }
@@ -537,12 +537,12 @@ function updateUI() {
     deliverySelect.innerHTML = '<option value="">Selecteer...</option>' +
         allItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
     
-    // Employee checkout
-    const employeeDiv = document.getElementById('employee-items');
+    // Clubmanager checkout
+    const clubmanagerDiv = document.getElementById('clubmanager-items');
     if (allItems.length === 0) {
-        employeeDiv.innerHTML = '<p style="color: #999; text-align: center;">Nog geen items</p>';
+        clubmanagerDiv.innerHTML = '<p style="color: #999; text-align: center;">Nog geen items</p>';
     } else {
-        employeeDiv.innerHTML = allItems.map(item => `
+        clubmanagerDiv.innerHTML = allItems.map(item => `
             <div class="input-group flex-row">
                 <div>
                     <label>${item.name}</label>
@@ -558,3 +558,7 @@ function updateUI() {
 // Load on startup
 loadItems('admin');
 setInterval(() => loadItems('admin'), 2000); // Auto-refresh elke 2 seconden
+</script>
+
+</body>
+</html>
