@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mooze Voorraadbeheer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; 
+            background: #f5f5f5; 
+            color: #333;
+            padding: 1rem;
+        }
+        
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 { font-size: 24px; margin-bottom: 0.5rem; }
+        .header p { color: #666; font-size: 14px; }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            padding: 0;
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        
+        .tab-btn.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
+        
+        .section {
+            display: none;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .section.active { display: block; }
+        
+        .card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .item-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item-info { flex: 1; }
+        .item-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .item-stock { font-size: 13px; color: #666; }
+        .item-stock.warning { color: #ff9800; font-weight: 600; }
+        .item-stock.danger { color: #f44336; font-weight: 600; }
+        
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        button {
+            padding: 10px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        
+        button:hover { background: #0052a3; }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover { background: #e8e8e8; }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-danger:hover { background: #d32f2f; }
+        
+        .btn-small {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .warning-banner {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 14px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .history-item {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .history-time { color: #999; font-size: 12px; }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #999;
+            padding: 2rem;
+        }
+        
+        h3 { font-size: 16px; margin-bottom: 1rem; margin-top: 0; }
+        
+        .qty-input {
+            width: 100px;
+        }
+        
+        .flex-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        
+        .flex-row > div {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📦 Mooze Voorraadbeheer</h1>
+        <p>Real-time inventarissysteem voor Hasselt & Mechelen</p>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('admin', this)">Admin</button>
+        <button class="tab-btn" onclick="switchTab('employee', this)">Werknemers</button>
+        <button class="tab-btn" onclick="switchTab('history', this)">Historiek</button>
+    </div>
+    
+    <!-- ADMIN -->
+    <div id="admin" class="section active">
+        <div id="admin-warnings"></div>
+        
+        <div class="card">
+            <h3>Nieuw item toevoegen</h3>
+            <div class="input-group">
+                <label>Productnaam</label>
+                <input type="text" id="newItemName" placeholder="bijv. Halters 10kg">
+            </div>
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Hoeveelheid</label>
+                    <input type="number" id="newItemQty" value="0" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Minimum</label>
+                    <input type="number" id="newItemMin" value="5" min="1">
+                </div>
+            </div>
+            <button onclick="addItem()">➕ Toevoegen</button>
+        </div>
+        
+        <div class="card">
+            <h3>Levering verwerken</h3>
+            <div class="input-group">
+                <label>Product</label>
+                <select id="deliveryItem">
+                    <option value="">Selecteer...</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Hoeveelheid</label>
+                <input type="number" id="deliveryQty" value="0" min="0">
+            </div>
+            <button onclick="addDelivery()">📦 Levering</button>
+        </div>
+        
+        <div class="card">
+            <h3>Huidige voorraad</h3>
+            <div id="admin-inventory" class="loading">Laden...</div>
+        </div>
+    </div>
+    
+    <!-- EMPLOYEE -->
+    <div id="employee" class="section">
+        <div class="card">
+            <h3>Materiaal uitchecken</h3>
+            <div id="employee-message" class="success-message"></div>
+            <div class="input-group">
+                <label>Jouw naam</label>
+                <input type="text" id="employeeName" placeholder="bijv. Jan de Vries">
+            </div>
+            <div id="employee-items" class="loading">Laden...</div>
+            <button onclick="submitCheckout()">✓ Opslaan</button>
+        </div>
+    </div>
+    
+    <!-- HISTORY -->
+    <div id="history" class="section">
+        <div id="history-list" class="loading">Laden...</div>
+    </div>
+</div>
+
+<script>
+const API = '/api';
+
+let allItems = [];
+
+async function loadItems(role = 'admin') {
+    try {
+        const response = await fetch(`${API}/items?role=${role}`);
+        allItems = await response.json();
+        updateUI();
+    } catch (error) {
+        console.error('Error loading items:', error);
+    }
+}
+
+function switchTab(tab, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+    btn.classList.add('active');
+    
+    if (tab === 'history') loadHistory();
+    else if (tab === 'admin') loadItems('admin');
+    else loadItems('employee');
+}
+
+async function addItem() {
+    const name = document.getElementById('newItemName').value.trim();
+    const qty = parseInt(document.getElementById('newItemQty').value) || 0;
+    const min = parseInt(document.getElementById('newItemMin').value) || 5;
+    
+    if (!name) {
+        alert('Voer een productnaam in');
+        return;
+    }
+    
+    try {
+        await fetch(`${API}/items`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, quantity: qty, minimum: min})
+        });
+        
+        document.getElementById('newItemName').value = '';
+        document.getElementById('newItemQty').value = '0';
+        document.getElementById('newItemMin').value = '5';
+        
+        loadItems('admin');
+    } catch (error) {
+        console.error('Error adding item:', error);
+    }
+}
+
+async function addDelivery() {
+    const itemId = parseInt(document.getElementById('deliveryItem').value);
+    const qty = parseInt(document.getElementById('deliveryQty').value);
+    
+    if (!itemId || qty <= 0) {
+        alert('Selecteer product en voer hoeveelheid in');
+        return;
+    }
+    
+    try {
+        await fetch(`${API}/delivery`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({item_id: itemId, quantity: qty})
+        });
+        
+        document.getElementById('deliveryQty').value = '0';
+        loadItems('admin');
+    } catch (error) {
+        console.error('Error adding delivery:', error);
+    }
+}
+
+async function submitCheckout() {
+    const name = document.getElementById('employeeName').value.trim();
+    if (!name) {
+        alert('Voer je naam in');
+        return;
+    }
+    
+    const items = [];
+    allItems.forEach(item => {
+        const input = document.getElementById(`qty-${item.id}`);
+        if (input) {
+            const taken = parseInt(input.value) || 0;
+            if (taken > 0) {
+                items.push({id: item.id, quantity: taken});
+            }
+        }
+    });
+    
+    if (items.length === 0) {
+        alert('Voer minstens één hoeveelheid in');
+        return;
+    }
+    
+    try {
+        await fetch(`${API}/checkout`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({employee_name: name, items})
+        });
+        
+        document.getElementById('employeeName').value = '';
+        allItems.forEach(item => {
+            const input = document.getElementById(`qty-${item.id}`);
+            if (input) input.value = '0';
+        });
+        
+        const msg = document.getElementById('employee-message');
+        msg.textContent = '✓ Opgeslagen!';
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 2000);
+        
+        loadItems('employee');
+    } catch (error) {
+        console.error('Error submitting checkout:', error);
+    }
+}
+
+async function deleteItem(id) {
+    if (confirm('Verwijderen?')) {
+        try {
+            await fetch(`${API}/item/${id}`, {method: 'DELETE'});
+            loadItems('admin');
+        } catch (error) {
+            console.error('Error deleting item:', error);
+        }
+    }
+}
+
+async function updateMinimum(id) {
+    const newMin = prompt('Minimale hoeveelheid:');
+    if (newMin !== null && newMin !== '') {
+        try {
+            await fetch(`${API}/item/${id}/minimum`, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({minimum: parseInt(newMin)})
+            });
+            loadItems('admin');
+        } catch (error) {
+            console.error('Error updating minimum:', error);
+        }
+    }
+}
+
+async function loadWarnings() {
+    try {
+        const response = await fetch(`${API}/warnings`);
+        const warnings = await response.json();
+        const div = document.getElementById('admin-warnings');
+        
+        if (warnings.length > 0) {
+            div.innerHTML = warnings.map(w => 
+                `<div class="warning-banner">⚠️ <strong>${w.name}</strong> bijna op: ${w.quantity} stuks (min: ${w.minimum})</div>`
+            ).join('');
+        } else {
+            div.innerHTML = '';
+        }
+    } catch (error) {
+        console.error('Error loading warnings:', error);
+    }
+}
+
+async function loadHistory() {
+    try {
+        const response = await fetch(`${API}/history`);
+        const history = await response.json();
+        const div = document.getElementById('history-list');
+        
+        if (history.length === 0) {
+            div.innerHTML = '<p style="color: #999; text-align: center;">Nog geen historiek</p>';
+            return;
+        }
+        
+        div.innerHTML = history.slice().reverse().map(h => {
+            const date = new Date(h.timestamp);
+            const time = date.toLocaleTimeString('nl-BE', {hour: '2-digit', minute: '2-digit'});
+            const dateStr = date.toLocaleDateString('nl-BE');
+            const icon = h.action === 'delivery' ? '📦' : h.action === 'checkout' ? '📤' : '➕';
+            
+            return `
+                <div class="history-item">
+                    ${icon} <strong>${h.product}</strong><br>
+                    ${h.quantity} stuks door <em>${h.by}</em><br>
+                    <span class="history-time">${dateStr} ${time}</span>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading history:', error);
+    }
+}
+
+function updateUI() {
+    // Admin inventory
+    const adminDiv = document.getElementById('admin-inventory');
+    if (allItems.length === 0) {
+        adminDiv.innerHTML = '<p style="color: #999; text-align: center;">Nog geen items</p>';
+    } else {
+        adminDiv.innerHTML = allItems.map(item => {
+            const statusClass = item.quantity <= item.minimum ? 'danger' : item.quantity <= item.minimum * 2 ? 'warning' : '';
+            return `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-stock ${statusClass}">
+                            ${item.quantity} stuks (min: ${item.minimum})
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-small btn-secondary" onclick="updateMinimum(${item.id})">Min</button>
+                        <button class="btn-small btn-danger" onclick="deleteItem(${item.id})">Verwijder</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Delivery dropdown
+    const deliverySelect = document.getElementById('deliveryItem');
+    deliverySelect.innerHTML = '<option value="">Selecteer...</option>' +
+        allItems.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+    
+    // Employee checkout
+    const employeeDiv = document.getElementById('employee-items');
+    if (allItems.length === 0) {
+        employeeDiv.innerHTML = '<p style="color: #999; text-align: center;">Nog geen items</p>';
+    } else {
+        employeeDiv.innerHTML = allItems.map(item => `
+            <div class="input-group flex-row">
+                <div>
+                    <label>${item.name}</label>
+                </div>
+                <input type="number" id="qty-${item.id}" placeholder="0" min="0" value="0" class="qty-input">
+            </div>
+        `).join('');
+    }
+    
+    loadWarnings();
+}
+
+// Load on startup
+loadItems('admin');
+setInterval(() => loadItems('admin'), 2000); // Auto-refresh elke 2 seconden
